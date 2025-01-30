@@ -18,17 +18,25 @@ public class Main{
   public static V8Runtime runtime;
   public static JavetProxyConverter javetProxyConverter;
   public static JavetJVMInterceptor javetJVMInterceptor;
-  public static void test(Cons<String> func){
+  public static void test(Cons func){
     func.get("Test");
   }
   public static void main(String[] args) {
     try {
       runtime = V8Host.getV8Instance().createV8Runtime();
       setupEnv();
-      runConsole("const T=(extend(Cons,{get(str){Packages.java.lang.System.out.println(str)}}));Packages.java.lang.System.out.println(T)");
+      runConsole("const T=(extend(Packages.myapp.Cons,{get(str){Packages.java.lang.System.out.println(str)}}));Packages.java.lang.System.out.println(T);");
+      runConsole("Packages.java.lang.System.out.println(Packages.myapp.Main.Inner)");
+      if(args.length>0) 
+          System.out.println(runConsole(args[0]));
     } catch (Exception err) {
       System.out.println(err.toString());
     }
+  }
+  public static interface ICons{
+    public void get(String str);
+  }
+  public static class Inner {
   }
   public static void setupEnv() throws Exception {
     javetProxyConverter = new JavetProxyConverter();
@@ -57,11 +65,12 @@ public class Main{
     runtime.getExecutor("const extend=javet.extend;const Packages=javet.package;const Cons=Packages.myapp.Cons;").executeVoid();
   }
 
-  public static void runConsole(String text) {
+  public static String runConsole(String text) {
     try {
-      V8Value v = runtime.getExecutor(text).setResourceName("console.js").execute();
+      return runtime.getExecutor(text).setResourceName("console.js").execute().toString();
     } catch (Throwable t) {
-      System.out.println(t.toString());
+      System.out.println(t);
+      return t.toString();
     }
   }
 }

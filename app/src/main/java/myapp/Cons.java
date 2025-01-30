@@ -1,5 +1,5 @@
 package myapp;
 
-public interface Cons<T>{
-    void get(T t);
+public interface Cons{
+    void get(String t);
 }
